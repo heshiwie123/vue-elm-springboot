@@ -63,7 +63,7 @@ function detailetShow(orders) {
 
         <ul class="order-detailet" v-show="item.isShowDetailet">
           <li v-for="odItem in item.list">
-            <p>{{ odItem.food.foodName }} x {{ odItem.quantity }}</p>
+            <p>{{ odItem.food.foodId }} x {{ odItem.quantity }}</p>
             <p>&#165;{{ odItem.food.foodPrice * odItem.quantity }}</p>
           </li>
           <li>

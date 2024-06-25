@@ -25,7 +25,7 @@ const tokenSession=TokenSessionStorage();
 // 设置请求拦截器
 axios.interceptors.request.use(config => {
 
-    if (config.url !=='user/login' && config.url !== 'user/saveUser') {
+    if (config.url !=='authenticate/login' && config.url !== 'user/saveUser') {
         const storedToken=sessionStorage.getItem('token')
         // 设置请求头
         config.headers.Authorization = storedToken;

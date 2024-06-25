@@ -12,11 +12,14 @@ const userSession = UserSessionStorage();
 const orderId = ref(
     route.query.orderId
 )
+
 const orders = ref({
   business: {}
 })
 const isShowDetailet = ref(false)
 const selectCode = ref(0)
+
+
 onMounted(() => {
 
   axios.get(`orders/getOrdersById?orderId=${orderId.value}`).then(response => {
@@ -46,6 +49,7 @@ function detailetShow() {
 function selectPayWay(code) {
   selectCode.value = code
 }
+
 </script>
 
 <template>
@@ -87,7 +91,7 @@ function selectPayWay(code) {
       </li>
     </ul>
     <div class="payment-button">
-      <button>确认支付</button>
+      <button >确认支付</button>
     </div>
     <!-- 底部菜单部分 -->
     <Footer></Footer>

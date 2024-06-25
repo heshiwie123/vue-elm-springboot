@@ -26,14 +26,12 @@ function login() {
 
   //登录请求
   axios.post('user/login',loginForm.value).then(response => {
-    const user = response.data.data.userInfo;
-    const token = response.data.data.token;
-    if (user == null || user === '') {
+
+    if (response.data.code !==200) {
       alert('用户名或密码不正确！');
     } else {
-      //sessionstorage有容量限制，为了防止数据溢出，所以不将userImg数据放入session
-
-      user.userImg = '';
+      const user = response.data.data.userInfo;
+      const token = response.data.data.token;
       userSession.setSessionStorage('user', user);
       tokenSession.setSessionStorage('token', token);
       //返回登陆前的位置

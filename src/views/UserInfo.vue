@@ -11,6 +11,8 @@ const router = useRouter();
 const user=ref({})
 onMounted(()=>{
   user.value=userSession.getSessionStorage('user')
+  console.log(user)
+  console.log(user.value.userImg)
 })
 </script>
 
@@ -29,7 +31,7 @@ onMounted(()=>{
          </div>
         </div>
         <div class="user-account-img">
-         <img src="../assets/userImg/yhtx08.png">
+         <img :src="user.userImg">
         </div>
         <div class="user-account-manager">
           <button>账户管理</button>

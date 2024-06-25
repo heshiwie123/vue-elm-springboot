@@ -8,38 +8,39 @@ import qs from "qs";
 const route = useRoute();
 const router = useRouter();
 const userStorage = UserSessionStorage();
-const cartId = ref('');
+const cartId = ref();
 const businessId = ref(
     route.query.businessId
 )
 const business = ref({})
 const foodArr = ref([])
 const user = ref({})
-const listCartForm=ref({
-  userId:'',
-  businessId:''
+
+const listCartForm = ref({
+  userId: '',
+  businessId: ''
 })
-const CartSaveForm=ref({
-  userId:'',
-  businessId:'',
+const CartSaveForm = ref({
+  userId: '',
+  businessId: '',
   foodId: ''
 })
-const CartUpdateForm=ref({
-
-  userId:'',
-  businessId:'',
+const CartUpdateForm = ref({
+  cartId: 0,
+  userId: '',
+  businessId: '',
   foodId: '',
-  quantity:''
+  quantity: ''
 })
 
 onMounted(() => {
   user.value = userStorage.getSessionStorage('user');
-  listCartForm.value.userId=user.value.userId
-  CartSaveForm.value.userId=user.value.userId
-  CartUpdateForm.value.userId=user.value.userId
-  listCartForm.value.businessId=businessId.value
-  CartSaveForm.value.businessId=businessId.value
-  CartUpdateForm.value.businessId=businessId.value
+  listCartForm.value.userId = user.value.userId
+  CartSaveForm.value.userId = user.value.userId
+  CartUpdateForm.value.userId = user.value.userId
+  listCartForm.value.businessId = businessId.value
+  CartSaveForm.value.businessId = businessId.value
+  CartUpdateForm.value.businessId = businessId.value
   //根据businessId查询商家信息
   axios.get(`business/getBusinessById?businessId=${businessId.value}`).then(response => {
     business.value = response.data.data.business;
@@ -63,7 +64,7 @@ onMounted(() => {
 })
 
 function listCart() {
-  axios.post('cart/listCart',listCartForm.value).then(response => {
+  axios.post('cart/listCart', listCartForm.value).then(response => {
     let cartArr = response.data.data.cartResponseDtos;
     cartId.value = response.data.data.cartResponseDtos.cartId;
     //遍历所有食品列表
@@ -82,8 +83,8 @@ function listCart() {
 }
 
 function minus(index) {
-  CartSaveForm.value.foodId= foodArr.value[index].foodId
-  CartUpdateForm.value.foodId= foodArr.value[index].foodId
+  CartSaveForm.value.foodId = foodArr.value[index].foodId
+  CartUpdateForm.value.foodId = foodArr.value[index].foodId
   //首先做登录验证
   if (user.value == null) {
     router.push({
@@ -101,8 +102,8 @@ function minus(index) {
 }
 
 function add(index) {
-  CartSaveForm.value.foodId= foodArr.value[index].foodId
-  CartUpdateForm.value.foodId= foodArr.value[index].foodId
+  CartSaveForm.value.foodId = foodArr.value[index].foodId
+  CartUpdateForm.value.foodId = foodArr.value[index].foodId
   //首先做登录验证
   if (user.value == null) {
     router.push({
@@ -124,6 +125,7 @@ function savaCart(index) {
     if (response.data.code === 200) {
       //此食品数量要更新为1；
       foodArr.value[index].quantity = 1;
+      foodArr.value[index].cartId = response.data.data;
       foodArr.value.sort();
     } else {
       alert('向购物车中添加食品失败！');
@@ -134,7 +136,8 @@ function savaCart(index) {
 }
 
 function updateCart(index, num) {
-  CartUpdateForm.value.quantity=foodArr.value[index].quantity + num
+  CartUpdateForm.value.quantity = foodArr.value[index].quantity + num
+  CartUpdateForm.value.cartId = foodArr.value[index].cartId
   axios.post('cart/updateCart', CartUpdateForm.value).then(response => {
     if (response.data.code === 200) {
       //此食品数量要更新为1或-1；
@@ -149,8 +152,11 @@ function updateCart(index, num) {
 }
 
 function removeCart(index) {
+  console.log(foodArr.value[index].cartId)
+  cartId.value = foodArr.value[index].cartId;
+  console.log("要移除的cartid = " + cartId.value)
   axios.post(`cart/removeCart?cartId=${cartId.value}`).then(response => {
-    if (response.data.code !== 200) {
+    if (response.data.code === 200) {
       //此食品数量要更新为0；视图的减号和数量要消失
       foodArr.value[index].quantity = 0;
       foodArr.value.sort();
@@ -163,10 +169,18 @@ function removeCart(index) {
 }
 
 function toOrder() {
+// 先清空购物车的id列表
+  const cartIdList = []
+  for (let i = 0; i < foodArr.value.length; i++) {
+    cartIdList.push(foodArr.value[i].cartId)
+  }
+  // 打印 cartIdList 检查其内容
+  console.log("cartIdList:"+cartIdList);
   router.push({
     path: '/orders',
     query: {
-      businessId: business.value.businessId
+      businessId: business.value.businessId,
+      cartIdList: JSON.stringify(cartIdList) // 转换为字符串传递
     }
   });
 }

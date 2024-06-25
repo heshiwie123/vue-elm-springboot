@@ -10,6 +10,8 @@ import qs from "qs";
 
 const route = useRoute();
 const router = useRouter();
+// 从路由参数接收并解析 cartIdList
+const cartIdList = ref(JSON.parse(route.query.cartIdList || '[]'));
 
 const businessId = ref(
     route.query.businessId
@@ -17,6 +19,13 @@ const businessId = ref(
 const business = ref({})
 const user = ref({})
 const cartArr = ref([])
+const orDertailetArr = ref([])
+//定义订单详情体
+const orDertaile = ref({
+  orderId : 0,
+  foodId : 0,
+  quantity : 0
+})
 const deliveryaddress = ref({})
 
 const listCartForm = ref({
@@ -51,11 +60,21 @@ onMounted(() => {
   }).catch(error => {
     console.error(error);
   });
+
 })
 
 const totalPrice = computed(() => {
   let totalPrice = 0;
   for (let cartItem of cartArr.value) {
+    // orDertaile.value.foodId = cartItem.foodId;
+    // orDertaile.value.quantity = cartItem.quantity;
+    // //将单个orDertaile加入到orDertailetArr
+    // console.log(orDertaile.value)
+    const newOrDertaile = {
+      foodId: cartItem.foodId,
+      quantity: cartItem.quantity
+    };
+    orDertailetArr.value.push(newOrDertaile);
     totalPrice += cartItem.food.foodPrice * cartItem.quantity;
   }
   totalPrice += business.value.deliveryPrice;
@@ -71,6 +90,23 @@ function toUserAddress() {
 }
 
 function toPayment() {
+  // function removeCart(indexList) {
+  // 打印 cartIdList 检查其内容
+  console.log(cartIdList.value);
+  // 遍历 cartIdList 并移除购物车项
+  for (let index of cartIdList.value) {
+    console.log("要移除的 cartId = " + index);
+    axios.post(`cart/removeCart?cartId=${index}`).then(response => {
+      if (response.data.code === 200) {
+        console.log(`Successfully removed cart item with ID: ${index}`);
+      } else {
+        alert('从购物车中删除食品失败！');
+      }
+    }).catch(error => {
+      console.error(error);
+    });
+  }
+  // }
   if (deliveryaddress.value == null) {
     alert('请选择送货地址！');
     return;
@@ -81,10 +117,29 @@ function toPayment() {
       orderCreate.value.orderTotal = totalPrice.value
 
   //创建订单
-  axios.put('orders/createOrders', orderCreate.value).then(response => {
+  axios.put('/orders/createOrders', orderCreate.value).then(response => {
 
     let orderId = response.data.data.res;
     if (orderId > 0) {
+      //TODO 根据这里的orderId,进行订单详情的插入
+      for ( let detail of  orDertailetArr.value){
+        console.log(detail)
+        detail.orderId = orderId;
+      }
+      //加入订单后
+      for ( let detail of  orDertailetArr.value){
+        console.log(detail)
+      }
+      //插入订单详情
+      axios.post('/orderDetailet/saveOrderDetailetBatch',orDertailetArr.value).then(response =>{
+        const res = response.data.code;
+        if(res === 500){
+          alert('创建订单详情失败')
+        }
+      }).catch(error => {
+        console.error(error);
+      });
+
       router.push({path: '/payment', query: {orderId: orderId}});
     } else {
       alert('创建订单失败！');
