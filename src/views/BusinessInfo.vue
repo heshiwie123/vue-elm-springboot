@@ -66,13 +66,14 @@ onMounted(() => {
 function listCart() {
   axios.post('cart/listCart', listCartForm.value).then(response => {
     let cartArr = response.data.data.cartResponseDtos;
-    cartId.value = response.data.data.cartResponseDtos.cartId;
+
     //遍历所有食品列表
     for (let foodItem of foodArr.value) {
       foodItem.quantity = 0;
       for (let cartItem of cartArr) {
         if (cartItem.foodId === foodItem.foodId) {
           foodItem.quantity = cartItem.quantity;
+          foodItem.cartId = cartItem.cartId
         }
       }
     }
@@ -156,7 +157,7 @@ function removeCart(index) {
   cartId.value = foodArr.value[index].cartId;
   console.log("要移除的cartid = " + cartId.value)
   axios.post(`cart/removeCart?cartId=${cartId.value}`).then(response => {
-    if (response.data.code === 200) {
+    if (response.data.code == 200) {
       //此食品数量要更新为0；视图的减号和数量要消失
       foodArr.value[index].quantity = 0;
       foodArr.value.sort();
@@ -171,11 +172,16 @@ function removeCart(index) {
 function toOrder() {
 // 先清空购物车的id列表
   const cartIdList = []
+  // 过滤 cartId 不为空的元素
+  // const cartIdList = foodArr.value.filter(item => item.cartId !== null && item.cartId !== undefined && item.cartId !== '').map(item => item.cartId);
   for (let i = 0; i < foodArr.value.length; i++) {
-    cartIdList.push(foodArr.value[i].cartId)
+    if(foodArr.value[i].cartId !== null && foodArr.value[i].cartId !== undefined && foodArr.value[i].cartId !== ''){
+      cartIdList.push(foodArr.value[i].cartId)
+    }
+
   }
   // 打印 cartIdList 检查其内容
-  console.log("cartIdList:"+cartIdList);
+  console.log("  BusinessInfo ====>cartIdList:"+cartIdList);
   router.push({
     path: '/orders',
     query: {

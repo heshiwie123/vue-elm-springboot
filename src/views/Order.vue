@@ -5,7 +5,6 @@ import {UserSessionStorage} from "@/stores/common.js";
 
 const userSession = UserSessionStorage();
 import axios from "axios";
-import qs from "qs";
 
 
 const route = useRoute();

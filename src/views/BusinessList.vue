@@ -22,7 +22,7 @@ onMounted(()=> {
   console.log(orderTypeId)
   //获取用户
   user.value = userStore.getSessionStorage('user');
-  listCartForm.value.userId=user.value.userId
+  listCartForm.value.userId=user.value.userId;
   //根据orderTypeId查询商家信息
   axios.get(`business/listBusinessByOrderTypeId?orderTypeId=${orderTypeId.value}`
 
