@@ -10,7 +10,7 @@ import axios from "axios";
 const route = useRoute();
 const router = useRouter();
 // 从路由参数接收并解析 cartIdList
-const cartIdList = ref(JSON.parse(route.query.cartIdList || '[]'));
+const cartIdList = JSON.parse(route.query.cartIdList || '[]');
 
 const businessId = ref(
     route.query.businessId
@@ -89,11 +89,10 @@ function toUserAddress() {
 }
 
 function toPayment() {
-  // function removeCart(indexList) {
-  // 打印 cartIdList 检查其内容
-  console.log(cartIdList.value);
+
+  console.log("要移除的cartIdList:"+cartIdList);
   // 遍历 cartIdList 并移除购物车项
-  for (let index of cartIdList.value) {
+  for (let index of cartIdList) {
     console.log("要移除的 cartId = " + index);
     axios.post(`cart/removeCart?cartId=${index}`).then(response => {
       if (response.data.code === 200) {
@@ -122,7 +121,7 @@ function toPayment() {
     if (orderId > 0) {
       //TODO 根据这里的orderId,进行订单详情的插入
       for ( let detail of  orDertailetArr.value){
-        console.log(detail)
+        console.log("订单详情："+detail)
         detail.orderId = orderId;
       }
       //加入订单后

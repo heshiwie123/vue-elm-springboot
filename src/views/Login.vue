@@ -23,7 +23,7 @@ function login() {
     alert('密码不能为空！');
     return;
   }
-
+  // authenticate/login
   //登录请求
   axios.post('user/login',loginForm.value).then(response => {
 
